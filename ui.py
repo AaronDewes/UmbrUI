@@ -80,7 +80,6 @@ class UmbrUI(fbscreen):
         self.build_info_section("tor", "r7cckf5ddovlud4uytnf4eoxaivgiykmrcglhg4zlwueknhuw66otiid.onion", (160, 98))
 
         response = stub.GetInfo(ln.GetInfoRequest(),metadata=metadata)
-        print(response.num_active_channels)
 
         self.build_info_section("Max Send", "3M Sats", (16, 160))
         self.build_info_section("Max Recieve", "2M Sats", (160, 160))
