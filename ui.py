@@ -15,6 +15,8 @@ from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
 from lib.pygamefb import fbscreen
 from lib.network import get_ip
 
+import pyqrcode
+
 black = (0, 0, 0)
 background_color = (247,249,251)
 bold_font = 'assets/Roboto-Bold.ttf'
@@ -100,6 +102,12 @@ class UmbrUI(fbscreen):
         umbrelImg = pygame.image.load('assets/logo.png')
         # pg.transform.rotozoom(IMAGE, 0, 2)
         umbrelImg = pygame.transform.scale(umbrelImg, (64, 73))
+
+        qr = pyqrcode.create("r7cckf5ddovlud4uytnf4eoxaivgiykmrcglhg4zlwueknhuw66otiid.onion")
+        qr.png("QR.png", scale=3)
+        img = pygame.image.load("QR.png")
+        self.screen.blit(img,(300, 150))
+        pygame.display.flip()
         
         self.screen.blit(umbrelImg, (16, 16))
         self.screen.blit(title, (90, 30))
