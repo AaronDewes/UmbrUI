@@ -24,12 +24,23 @@ On Pi:
 ```
 python3 ui.py
 ```
-Make sure to configure the bitcoin RPC access before:
+
+Make sure to configure the RPC access before running that:
 
 ```
+export LND_IP=10.0.0.9
+export LND_GRPC_PORT=10009
 export BITCOIN_IP=10.0.0.8
 export BITCOIN_RPC_PORT=18443
 export BITCOIN_P2P_PORT=18444
 export BITCOIN_RPC_USER=umbrel
 export BITCOIN_RPC_PASS=GzE-ZFH2yZL82R_KWtY8kPxcb62e8eibQsGB0ag9Ip8=
 ```
+
+Replace these vaulues with your actual data.
+
+In addition, you can set `USE_REGTEST` or `USE_TESTNET` to use these networks.
+
+Make sure to copy your lnd folder to this directory befor starting.
+
+And you'll need to login to the dashboard once.
