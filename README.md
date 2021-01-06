@@ -22,4 +22,12 @@ On Pi:
 ```
 python3 ui.py
 ```
+Make sure to configure the bitcoin RPC access before:
 
+```
+export BITCOIN_IP=10.0.0.8
+export BITCOIN_RPC_PORT=18443
+export BITCOIN_P2P_PORT=18444
+export BITCOIN_RPC_USER=umbrel
+export BITCOIN_RPC_PASS=GzE-ZFH2yZL82R_KWtY8kPxcb62e8eibQsGB0ag9Ip8=
+```
