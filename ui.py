@@ -64,7 +64,7 @@ class UmbrUI(fbscreen):
         self.add_qr_code()
         self.build_info_section("admin", get_ip(), (col1_x, row1_y))
         # Tor is always going to be really long so not sure about this one ... :/
-        self.build_info_section("tor", "r7cckasdfasfdargsnf4eoxaivgiykmrcglhg4zlwueknhuw66otiid.onion", (160, row1_y))
+        self.build_info_section("tor", "r7cckasdfasfdargsnf4eoxaivgiykmrcglhg4zlwueknhuw66otiid.onion", (col2_x, row1_y))
 
         response = stub.GetInfo(ln.GetInfoRequest(),metadata=metadata)
 
@@ -78,24 +78,24 @@ class UmbrUI(fbscreen):
 
     def init(self):
         pygame.init()
-        self.titleFont = pygame.font.Font(bold_font, 46)
-        self.headingFont = pygame.font.Font(light_font, 12)
-        self.textFont = pygame.font.Font(bold_font, 18)
+        self.titleFont = pygame.font.Font(bold_font, 56)
+        self.headingFont = pygame.font.Font(light_font, 18)
+        self.textFont = pygame.font.Font(bold_font, 32)
 
     def add_logo_and_text(self):
         title = self.titleFont.render("umbrel", True, black)
 
         umbrelImg = pygame.image.load('assets/logo.png')
         # pg.transform.rotozoom(IMAGE, 0, 2)
-        umbrelImg = pygame.transform.scale(umbrelImg, (64, 73))
+        umbrelImg = pygame.transform.scale(umbrelImg, (88, 100))
         
         self.screen.blit(umbrelImg, (16, 16))
-        self.screen.blit(title, (90, 30))
+        self.screen.blit(title, (110, 30))
 
     def add_qr_code(self):
         qrImg = generate_qr_code(get_ip())
         
-        self.screen.blit(qrImg, (360, 16))
+        self.screen.blit(qrImg, (544, 16))
 
     def build_info_section(self, heading, text, position):
         heading = self.headingFont.render(heading, True, black)
@@ -103,7 +103,7 @@ class UmbrUI(fbscreen):
 
         x, y = position
         self.screen.blit(heading, position)
-        self.screen.blit(text, (x, y + 20))
+        self.screen.blit(text, (x, y + 25))
 
 # Create an instance of the UmbrUI class
 game = UmbrUI()
