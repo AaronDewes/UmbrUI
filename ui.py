@@ -48,9 +48,10 @@ class UmbrUI(fbscreen):
 
         self.add_logo_and_text()
         self.add_qr_code()
-        self.build_info_section("admin", get_ip(), (columns_x[0], rows_y[0]))
+        self.build_info_section("admin", get_ip(), (300, 120), False, True)
         # Tor is always going to be really long so not sure about this one ... :/
-        self.build_info_section("tor", "r7cckasdfasfdargsnf4eoxaivgiykmrcglhg4zlwueknhuw66otiid.onion", (columns_x[1], rows_y[0]))
+        self.build_info_section("tor", "r7cckasdfasfdargsnf4eoxaivgiykmrcglhg4zlwueknhuw66otiid.onion", (columns_x[0], rows_y[0]), 
+        pygame.font.Font(bold_font, 22))
 
         response = stub.GetInfo(ln.GetInfoRequest(),metadata=metadata)
 
@@ -85,12 +86,19 @@ class UmbrUI(fbscreen):
         
         self.screen.blit(qrImg, (544, 16))
 
-    def build_info_section(self, heading, text, position):
+    def build_info_section(self, heading, text, position, textfont=False, headingRight=False):
+        if(textfont == False):
+            textfont = self.textFont
         heading = self.headingFont.render(heading, True, black)
-        text = self.textFont.render(text, True, black)
+        text = textfont.render(text, True, black)
 
         x, y = position
-        self.screen.blit(heading, position)
+        headingPosition = position
+        if(headingRight):
+            headingSize = heading.get_width()
+            textSize = text.get_width()
+            headingPosition = (x + textSize - headingSize, y)
+        self.screen.blit(heading, headingPosition)
         self.screen.blit(text, (x, y + 25))
 
     def warnUI(self):
