@@ -1,4 +1,4 @@
-import threading
+import threading, _thread
 import pygame
 from time import sleep
 
@@ -23,7 +23,7 @@ class eventListener(object):
                     pygame.quit()
 
                     # quit the program.
-                    quit()
+                    _thread.interrupt_main()
         
             sleep(2)
             # Draws the surface object to the screen.

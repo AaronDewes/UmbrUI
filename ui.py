@@ -15,29 +15,22 @@ from lib.qr_generator import generate_qr_code
 from lib.lnd import get_stub, get_macaroon, check_lnd
 from lib.eventlistener import eventListener
 from consts import black, background_color, bold_font, light_font, columns_x, rows_y
-from warnui import WarnUI
 
 # Try to connect to bitcoin RPC and get data
 try:
     btcurl = "http://%s:%s@%s:%s"%(os.getenv('BITCOIN_RPC_USER'), os.getenv('BITCOIN_RPC_PASS'), os.getenv('BITCOIN_IP'), os.getenv('BITCOIN_RPC_PORT'))
     rpc_connection = AuthServiceProxy(btcurl)
-    rpc_connection.getwalletinfo()
+    rpc_connection.getblockchaininfo()
 except Exception:
     print("Please make sure BITCOIN_RPC_PORT, BITCOIN_RPC_PASS, BITCOIN_IP and BITCOIN_RPC_PORT are set and valid")
     exit(1)
 
+btcurl = "http://%s:%s@%s:%s"%(os.getenv('BITCOIN_RPC_USER'), os.getenv('BITCOIN_RPC_PASS'), os.getenv('BITCOIN_IP'), os.getenv('BITCOIN_RPC_PORT'))
+rpc_connection = AuthServiceProxy(btcurl)
 print("Connection to bitcoin core established.")
 
 print("Attemtping to connect to LND")
 os.environ["GRPC_SSL_CIPHER_SUITES"] = 'HIGH+ECDSA'
-
-# Wait until lnd is configured & unlocked
-warnui = WarnUI()
-listener = eventListener()
-check_lnd(warnui)
-listener.stop()
-pygame.quit()
-print("Connected to LND")
 
 # Define variables outside of the check function
 stub = get_stub()
@@ -47,7 +40,7 @@ class UmbrUI(fbscreen):
     def __init__(self):
         # Call parent constructor
         fbscreen.__init__(self)
-        
+    def MainInit(self):
         # Set background color to umbrel
         self.screen.fill(background_color)
 
@@ -61,10 +54,12 @@ class UmbrUI(fbscreen):
 
         response = stub.GetInfo(ln.GetInfoRequest(),metadata=metadata)
 
+        btcresponse = rpc_connection.getblockchaininfo()
         self.build_info_section("Max Send", "3M Sats", (columns_x[0], rows_y[1]))
         self.build_info_section("Max Recieve", "2M Sats", (columns_x[1], rows_y[1]))
         self.build_info_section("Active Channels", str(response.num_active_channels), (columns_x[2], rows_y[1]))
         self.build_info_section("24H Forwards", "53", (columns_x[0], rows_y[2]))
+        self.build_info_section("Sync progress", str(btcresponse["verificationprogress"] * 100) + "%", (columns_x[1], rows_y[2]))
             
         pygame.display.set_caption("UmbrUI")
         pygame.display.update() 
@@ -98,6 +93,36 @@ class UmbrUI(fbscreen):
         self.screen.blit(heading, position)
         self.screen.blit(text, (x, y + 25))
 
+    def warnUI(self):
+        # Call parent constructor
+        fbscreen.__init__(self)
+
+        # Set background color to umbrel
+        self.screen.fill(background_color)
+
+        pygame.init()
+        self.titleFont = pygame.font.Font(bold_font, 46)
+        self.headingFont = pygame.font.Font(light_font, 12)
+        self.textFont = pygame.font.Font(bold_font, 18)
+
+        self.add_logo_and_text()
+        self.add_warning("You haven't opened the Umbrel dashboard yet.", (columns_x[0], rows_y[0]))
+        self.add_warning("Please do that first to access this screen.", (columns_x[0], rows_y[1] - 70))
+        pygame.display.set_caption("UmbrUI")
+        pygame.display.update()
+
+    def add_warning(self, text, position):
+        text = self.textFont.render(text, True, black)
+
+        x, y = position
+        self.screen.blit(text, (x, y))
+
 # Create an instance of the UmbrUI class
 game = UmbrUI()
 listener = eventListener()
+game.warnUI()
+check_lnd()
+print("Connected to LND")
+game.MainInit()
+
+while True: pass # Ensure the program doesn't exit

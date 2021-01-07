@@ -30,7 +30,7 @@ def get_macaroon():
             macaroon = codecs.encode(macaroon_bytes, 'hex')
     return macaroon
 
-def check_lnd(warnui):
+def check_lnd():
     try:
         stub = get_stub()
         metadata = [('macaroon',get_macaroon())]
@@ -38,4 +38,4 @@ def check_lnd(warnui):
         response.num_active_channels
     except grpc._channel._InactiveRpcError:
         sleep(2)
-        check_lnd(warnui)
+        check_lnd()
