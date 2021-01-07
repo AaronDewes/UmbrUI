@@ -5,7 +5,7 @@ import os
 from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
 import pyqrcode
 import grpc
-import asyncio
+import threading
 
 # Local libraries & files
 import rpc_pb2 as ln
@@ -13,8 +13,9 @@ from lib.fbscreen import fbscreen
 from lib.network import get_ip
 from lib.qr_generator import generate_qr_code
 from lib.lnd import get_stub, get_macaroon, check_lnd
-from lib.eventlistener import eventlistener
+from lib.eventlistener import eventListener
 from consts import black, background_color, bold_font, light_font, columns_x, rows_y
+from warnui import WarnUI
 
 # Try to connect to bitcoin RPC and get data
 try:
@@ -31,7 +32,11 @@ print("Attemtping to connect to LND")
 os.environ["GRPC_SSL_CIPHER_SUITES"] = 'HIGH+ECDSA'
 
 # Wait until lnd is configured & unlocked
-check_lnd()
+warnui = WarnUI()
+listener = eventListener()
+check_lnd(warnui)
+listener.stop()
+pygame.quit()
 print("Connected to LND")
 
 # Define variables outside of the check function
@@ -95,5 +100,4 @@ class UmbrUI(fbscreen):
 
 # Create an instance of the UmbrUI class
 game = UmbrUI()
-
-asyncio.run(eventlistener())
+listener = eventListener()
