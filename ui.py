@@ -8,6 +8,7 @@ import codecs
 
 from lib.pygamefb import fbscreen
 from lib.network import get_ip
+from lib.qr_generator import generate_qr_code
 
 from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
 
@@ -65,6 +66,13 @@ metadata = [('macaroon',macaroon)]
 #response = stub.GetInfo(ln.GetInfoRequest(),metadata=metadata)
 #print(response.total_balance)
 
+col1_x = 20
+col2_x = 160
+col3_x = 301
+row1_y = 125
+row2_y =  185
+row3_y = 245
+
 class UmbrUI(fbscreen):
     def __init__(self):
         # Call parent constructor
@@ -76,18 +84,19 @@ class UmbrUI(fbscreen):
         self.init()
 
         self.add_logo_and_text()
-        self.build_info_section("admin", get_ip(), (16, 98))
-        
+        self.add_qr_code()
+        self.build_info_section("admin", get_ip(), (col1_x, row1_y))
         # Tor is always going to be really long so not sure about this one ... :/
-        self.build_info_section("tor", "r7cckf5ddovlud4uytnf4eoxaivgiykmrcglhg4zlwueknhuw66otiid.onion", (160, 98))
+        self.build_info_section("tor", "r7cckasdfasfdargsnf4eoxaivgiykmrcglhg4zlwueknhuw66otiid.onion", (160, row1_y))
 
         response = stub.GetInfo(ln.GetInfoRequest(),metadata=metadata)
 
-        self.build_info_section("Max Send", "3M Sats", (16, 160))
-        self.build_info_section("Max Recieve", "2M Sats", (160, 160))
-        self.build_info_section("Active Channels", str(response.num_active_channels), (305, 160))
-        self.build_info_section("24H Forwards", "53", (16, 223))
+        self.build_info_section("Max Send", "3M Sats", (col1_x, row2_y))
+        self.build_info_section("Max Recieve", "2M Sats", (col2_x, row2_y))
+        self.build_info_section("Active Channels", str(response.num_active_channels), (col3_x, row2_y))
+        self.build_info_section("24H Forwards", "53", (col1_x, row3_y))
             
+        pygame.display.set_caption("UmbrUI")
         pygame.display.update() 
 
     def init(self):
@@ -112,6 +121,11 @@ class UmbrUI(fbscreen):
         self.screen.blit(umbrelImg, (16, 16))
         self.screen.blit(title, (90, 30))
 
+    def add_qr_code(self):
+        qrImg = generate_qr_code(get_ip())
+        
+        self.screen.blit(qrImg, (360, 16))
+
     def build_info_section(self, heading, text, position):
         heading = self.headingFont.render(heading, True, black)
         text = self.textFont.render(text, True, black)
@@ -124,17 +138,18 @@ class UmbrUI(fbscreen):
 game = UmbrUI()
 
 while True:
-     for event in pygame.event.get():
-     
+    for event in pygame.event.get():
+    
         # if event object type is QUIT
         # then quitting the pygame
         # and program both.
         if event.type == pygame.QUIT:
             # deactivates the pygame library
             pygame.quit()
- 
+
             # quit the program.
             quit()
  
-        # Draws the surface object to the screen.
-        pygame.display.update()
+    time.sleep(2)
+    # Draws the surface object to the screen.
+    pygame.display.update()
