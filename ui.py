@@ -1,19 +1,22 @@
+# Libraries provided by the system
 import pygame
 from time import sleep
 import os
 from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
 import pyqrcode
 import grpc
+import asyncio
 
-
-from lib.pygamefb import fbscreen
+# Local libraries & files
+import rpc_pb2 as ln
+from lib.fbscreen import fbscreen
 from lib.network import get_ip
 from lib.qr_generator import generate_qr_code
-import rpc_pb2 as ln
-from warnui import WarnUI
-from consts import *
+from lib.lnd import get_stub, get_macaroon, check_lnd
+from lib.eventlistener import eventlistener
+from consts import black, background_color, bold_font, light_font, columns_x, rows_y
 
-# Connect to bitcoin RPC and get data
+# Try to connect to bitcoin RPC and get data
 try:
     btcurl = "http://%s:%s@%s:%s"%(os.getenv('BITCOIN_RPC_USER'), os.getenv('BITCOIN_RPC_PASS'), os.getenv('BITCOIN_IP'), os.getenv('BITCOIN_RPC_PORT'))
     rpc_connection = AuthServiceProxy(btcurl)
@@ -27,28 +30,13 @@ print("Connection to bitcoin core established.")
 print("Attemtping to connect to LND")
 os.environ["GRPC_SSL_CIPHER_SUITES"] = 'HIGH+ECDSA'
 
-
-stub = get_stub()
-
-metadata = [('macaroon',get_macaroon())]
-
-def check_lnd():
-    try:
-        warnui
-    except Exception:
-        warnui = WarnUI()
-    try:
-        response = stub.GetInfo(ln.GetInfoRequest(),metadata=metadata)
-        response.num_active_channels
-    except grpc._channel._InactiveRpcError:
-        sleep(2)
-        check_lnd()
-    else:
-        pygame.quit()
-    
+# Wait until lnd is configured & unlocked
 check_lnd()
-
 print("Connected to LND")
+
+# Define variables outside of the check function
+stub = get_stub()
+metadata = [('macaroon',get_macaroon())]
 
 class UmbrUI(fbscreen):
     def __init__(self):
@@ -62,16 +50,16 @@ class UmbrUI(fbscreen):
 
         self.add_logo_and_text()
         self.add_qr_code()
-        self.build_info_section("admin", get_ip(), (col1_x, row1_y))
+        self.build_info_section("admin", get_ip(), (columns_x[0], rows_y[0]))
         # Tor is always going to be really long so not sure about this one ... :/
-        self.build_info_section("tor", "r7cckasdfasfdargsnf4eoxaivgiykmrcglhg4zlwueknhuw66otiid.onion", (col2_x, row1_y))
+        self.build_info_section("tor", "r7cckasdfasfdargsnf4eoxaivgiykmrcglhg4zlwueknhuw66otiid.onion", (columns_x[1], rows_y[0]))
 
         response = stub.GetInfo(ln.GetInfoRequest(),metadata=metadata)
 
-        self.build_info_section("Max Send", "3M Sats", (col1_x, row2_y))
-        self.build_info_section("Max Recieve", "2M Sats", (col2_x, row2_y))
-        self.build_info_section("Active Channels", str(response.num_active_channels), (col3_x, row2_y))
-        self.build_info_section("24H Forwards", "53", (col1_x, row3_y))
+        self.build_info_section("Max Send", "3M Sats", (columns_x[0], rows_y[1]))
+        self.build_info_section("Max Recieve", "2M Sats", (columns_x[1], rows_y[1]))
+        self.build_info_section("Active Channels", str(response.num_active_channels), (columns_x[2], rows_y[1]))
+        self.build_info_section("24H Forwards", "53", (columns_x[0], rows_y[2]))
             
         pygame.display.set_caption("UmbrUI")
         pygame.display.update() 
@@ -108,19 +96,4 @@ class UmbrUI(fbscreen):
 # Create an instance of the UmbrUI class
 game = UmbrUI()
 
-while True:
-    for event in pygame.event.get():
-    
-        # if event object type is QUIT
-        # then quitting the pygame
-        # and program both.
-        if event.type == pygame.QUIT:
-            # deactivates the pygame library
-            pygame.quit()
-
-            # quit the program.
-            quit()
- 
-    sleep(2)
-    # Draws the surface object to the screen.
-    pygame.display.update()
+asyncio.run(eventlistener())

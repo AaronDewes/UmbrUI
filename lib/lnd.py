@@ -1,8 +1,14 @@
 import grpc
-import rpc_pb2 as ln
-import rpc_pb2_grpc as lnrpc
 import codecs
 import os
+import pygame
+from time import sleep
+import asyncio
+
+import rpc_pb2 as ln
+import rpc_pb2_grpc as lnrpc
+from warnui import WarnUI
+from lib.eventlistener import eventlistener
 
 def get_stub():
     cert = open(os.path.expanduser('./lnd/tls.cert'), 'rb').read()
@@ -26,3 +32,20 @@ def get_macaroon():
             macaroon_bytes = f.read()
             macaroon = codecs.encode(macaroon_bytes, 'hex')
     return macaroon
+
+def check_lnd():
+    try:
+        warnui
+    except Exception:
+        warnui = WarnUI()
+        asyncio.run(eventlistener())
+    try:
+        stub = get_stub()
+        metadata = [('macaroon',get_macaroon())]
+        response = stub.GetInfo(ln.GetInfoRequest(),metadata=metadata)
+        response.num_active_channels
+    except grpc._channel._InactiveRpcError:
+        sleep(2)
+        check_lnd()
+    else:
+        pygame.quit()

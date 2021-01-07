@@ -1,6 +1,6 @@
 import pygame
-from lib.pygamefb import fbscreen
-from consts import *
+from lib.fbscreen import fbscreen
+from consts import black, background_color, bold_font, light_font, columns_x, rows_y
 
 class WarnUI(fbscreen):
     def __init__(self):
@@ -13,8 +13,8 @@ class WarnUI(fbscreen):
         self.init()
 
         self.add_logo_and_text()
-        self.add_warning("", "You haven't opened the Umbrel dashboard yet.", (col1_x, row1_y))
-        self.add_warning("", "Please do that first to access this screen.", (col1_x, 155))
+        self.add_warning("You haven't opened the Umbrel dashboard yet.", (columns_x[0], rows_y[0]))
+        self.add_warning("Please do that first to access this screen.", (columns_x[0], rows_y[1] - 70))
         pygame.display.set_caption("UmbrUI")
         pygame.display.update()
 
@@ -34,10 +34,8 @@ class WarnUI(fbscreen):
         self.screen.blit(umbrelImg, (16, 16))
         self.screen.blit(title, (90, 30))
 
-    def add_warning(self, heading, text, position):
-        heading = self.headingFont.render(heading, True, black)
+    def add_warning(self, text, position):
         text = self.textFont.render(text, True, black)
 
         x, y = position
-        self.screen.blit(heading, position)
-        self.screen.blit(text, (x, y + 20))
+        self.screen.blit(text, (x, y))
