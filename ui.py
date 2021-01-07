@@ -1,28 +1,17 @@
 import pygame
-import time
+from time import sleep
 import os
+from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
+import pyqrcode
 import grpc
-import rpc_pb2 as ln
-import rpc_pb2_grpc as lnrpc
-import codecs
+
 
 from lib.pygamefb import fbscreen
 from lib.network import get_ip
 from lib.qr_generator import generate_qr_code
-
-from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
-
-
-from lib.pygamefb import fbscreen
-from lib.network import get_ip
-
-import pyqrcode
-
-black = (0, 0, 0)
-background_color = (247,249,251)
-bold_font = 'assets/Roboto-Bold.ttf'
-light_font = 'assets/Roboto-Light.ttf'
-
+import rpc_pb2 as ln
+from warnui import WarnUI
+from consts import *
 
 # Connect to bitcoin RPC and get data
 try:
@@ -38,40 +27,28 @@ print("Connection to bitcoin core established.")
 print("Attemtping to connect to LND")
 os.environ["GRPC_SSL_CIPHER_SUITES"] = 'HIGH+ECDSA'
 
-# Lnd cert is at ~/.lnd/tls.cert on Linux and
-# ~/Library/Application Support/Lnd/tls.cert on Mac
-cert = open(os.path.expanduser('./lnd/tls.cert'), 'rb').read()
-creds = grpc.ssl_channel_credentials(cert)
-lnurl = "%s:%s"%(os.getenv('LND_IP'), os.getenv('LND_GRPC_PORT'))
-channel = grpc.secure_channel(lnurl, creds)
-stub = lnrpc.LightningStub(channel)
 
-if(os.getenv("USE_REGTEST")):
-    with open('./lnd/data/chain/bitcoin/regtest/admin.macaroon', 'rb') as f:
-        macaroon_bytes = f.read()
-        macaroon = codecs.encode(macaroon_bytes, 'hex')
-elif(os.getenv("USE_TESTNET")):
-    with open('./lnd/data/chain/bitcoin/testnet/admin.macaroon', 'rb') as f:
-        macaroon_bytes = f.read()
-        macaroon = codecs.encode(macaroon_bytes, 'hex')
-else:
-    with open('./lnd/data/chain/bitcoin/mainnet/admin.macaroon', 'rb') as f:
-        macaroon_bytes = f.read()
-        macaroon = codecs.encode(macaroon_bytes, 'hex')
+stub = get_stub()
 
+metadata = [('macaroon',get_macaroon())]
 
-metadata = [('macaroon',macaroon)]
+def check_lnd():
+    try:
+        warnui
+    except Exception:
+        warnui = WarnUI()
+    try:
+        response = stub.GetInfo(ln.GetInfoRequest(),metadata=metadata)
+        response.num_active_channels
+    except grpc._channel._InactiveRpcError:
+        sleep(2)
+        check_lnd()
+    else:
+        pygame.quit()
+    
+check_lnd()
 
-# Example
-#response = stub.GetInfo(ln.GetInfoRequest(),metadata=metadata)
-#print(response.total_balance)
-
-col1_x = 20
-col2_x = 160
-col3_x = 301
-row1_y = 125
-row2_y =  185
-row3_y = 245
+print("Connected to LND")
 
 class UmbrUI(fbscreen):
     def __init__(self):
@@ -111,12 +88,6 @@ class UmbrUI(fbscreen):
         umbrelImg = pygame.image.load('assets/logo.png')
         # pg.transform.rotozoom(IMAGE, 0, 2)
         umbrelImg = pygame.transform.scale(umbrelImg, (64, 73))
-
-        qr = pyqrcode.create("r7cckf5ddovlud4uytnf4eoxaivgiykmrcglhg4zlwueknhuw66otiid.onion")
-        qr.png("QR.png", scale=3)
-        img = pygame.image.load("QR.png")
-        self.screen.blit(img,(300, 150))
-        pygame.display.flip()
         
         self.screen.blit(umbrelImg, (16, 16))
         self.screen.blit(title, (90, 30))
@@ -150,6 +121,6 @@ while True:
             # quit the program.
             quit()
  
-    time.sleep(2)
+    sleep(2)
     # Draws the surface object to the screen.
     pygame.display.update()

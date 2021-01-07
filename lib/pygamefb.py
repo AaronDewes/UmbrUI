@@ -8,7 +8,6 @@ class fbscreen:
         # Check env variable to be able to run in X env (e.g. Mac)
         if os.environ.get('NOTPI'):
             self.screen = pygame.display.set_mode((480, 320))
-            pygame.display.set_caption('RPi screen emulator')
             return None
 
         "Ininitializes a new pygame screen using the framebuffer"

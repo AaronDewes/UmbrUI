@@ -29,4 +29,3 @@ def generate_qr_code(data):
     # Cleanup created image
     os.remove(QR_file_name)
     return container
-    
