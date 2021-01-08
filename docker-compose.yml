@@ -1,14 +1,9 @@
 version: "3.8"
 services:
-  fbcp:
-    image: aarondewes/fbcp:master
-    devices:
-        - "/dev/dri/card0:/dev/dri/card0"
-        - "/dev/fb0:/dev/fb0"
-
   app:
     build: .
     depends_on: fbcp
     devices:
         - "/dev/dri/card0:/dev/dri/card0"
         - "/dev/fb0:/dev/fb0"
+        - "/dev/gpiomem:/dev/gpiomem"
