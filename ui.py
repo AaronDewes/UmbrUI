@@ -86,7 +86,7 @@ class UmbrUI(fbscreen):
         
         self.screen.blit(qrImg, (544, 16))
 
-    def build_info_section(self, heading, text, position, textfont=False, headingRight=False):
+    def build_info_section(self, heading, text, position, textfont=False, alignRight=False):
         if(textfont == False):
             textfont = self.textFont
         heading = self.headingFont.render(heading, True, black)
@@ -94,12 +94,16 @@ class UmbrUI(fbscreen):
 
         x, y = position
         headingPosition = position
-        if(headingRight):
+        textPosition = (x, y + 25)
+        if(alignRight):
             headingSize = heading.get_width()
             textSize = text.get_width()
-            headingPosition = (x + textSize - headingSize, y)
+            if(headingSize < textSize):
+                headingPosition = (x + textSize - headingSize, y)
+            else:
+                textPosition =  (x + headingSize - textSize, y + 25)
         self.screen.blit(heading, headingPosition)
-        self.screen.blit(text, (x, y + 25))
+        self.screen.blit(text, textPosition)
 
     def warnUI(self):
         # Call parent constructor
