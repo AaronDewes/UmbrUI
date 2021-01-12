@@ -4,8 +4,7 @@ WORKDIR /app
 
 RUN apt-get update
 RUN apt-get install -y python3-pip
-# pygame deps
-RUN apt-get install -y python3-grpcio python3-grpc-tools python3-pygame python3-png python3-png python3-pyqrcode
+RUN apt-get install -y python3-grpcio python3-grpc-tools python3-pygame python3-png python3-pyqrcode
 
 RUN pip3 install python-bitcoinrpc googleapis-common-protos
 
