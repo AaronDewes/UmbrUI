@@ -38,6 +38,9 @@ class UmbrUI():
         self.build_info_section("tor", "r7cckasdfasfdargsnf4eoxaivgiykmrcglhg4zlwueknhuw66otiid.onion", (columns_x[0], rows_y[0]), 
         pygame.freetype.Font(bold_font, 22))
 
+        stub = get_stub()
+        metadata = [('macaroon',get_macaroon())]
+
         response = stub.GetInfo(ln.GetInfoRequest(),metadata=metadata)
 
         btcresponse = rpc_connection.getblockchaininfo()
