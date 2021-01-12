@@ -1,12 +1,13 @@
 FROM python:3.7-slim
-WORKDIR /code
+
+WORKDIR /app
 
 RUN apt-get update
 RUN apt-get install -y python3-pip
 # pygame deps
-RUN apt-get install -y libsdl2-dev libsdl2-mixer-dev libsdl2-image-dev libsdl2-ttf-dev libfreetype6-dev libjpeg-dev libportmidi-dev python3-grpcio python3-grpc-tools
+RUN apt-get install -y python3-grpcio python3-grpc-tools python3-pygame python3-png python3-png python3-pyqrcode
 
-RUN pip3 install pypng pygame pyqrcode python-bitcoinrpc googleapis-common-protos
+RUN pip3 install python-bitcoinrpc googleapis-common-protos
 
 COPY . .
 # RUN ["python3", "--version"]
